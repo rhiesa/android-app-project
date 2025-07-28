@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindful Weight Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .eating-window {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .calorie-mountain {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calorie-mountain::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .calorie-number {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .calorie-number.live {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .calorie-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .zone-indicator {
+            margin-top: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .zone-green { background: rgba(76, 175, 80, 0.8); }
+        .zone-yellow { background: rgba(255, 193, 7, 0.8); color: #333; }
+        .zone-red { background: rgba(244, 67, 54, 0.8); }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .navigation-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .mountain-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mountain-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        .mountain-number {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .mountain-label {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .target-date {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 15px;
+            padding: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ee5a24, #ff6b6b);
+        }
+
+        .daily-summary {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .summary-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .reason-btn {
+            display: block;
+            width: 100%;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .reason-btn:hover {
+            background: #e9ecef;
+            border-color: #007bff;
+        }
+
+        .reason-btn.selected {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .redirect-message {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            color: #856404;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        .time-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .warning-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            z-index: 999;
+            animation: slideUp 0.5s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .warning-banner.low-calories {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(100%); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .calorie-number {
+                font-size: 36px;
+            }
+            
+            .actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="time-display" id="time-display">12:08 AM</div>
+        <button class="settings-btn" onclick="openSettings()">⚙️</button>
+        
+        <div class="header">
+            <h1>Mindful Weight Tracker</h1>
+            <p>Your journey to mindful eating</p>
+        </div>
+
+        <div class="navigation-tabs">
+            <button class="nav-tab active" onclick="switchScreen('forest')">🌲 Forest</button>
+            <button class="nav-tab" onclick="switchScreen('mountain')">⛰️ Mountain</button>
+        </div>
+
+        <!-- Forest Screen (Daily View) -->
+        <div class="screen active" id="forest-screen">
+            <div class="eating-window">
+                <div id="window-status">Eating Window: 8:00 AM - 6:00 PM</div>
+                <div id="window-message">You're in your eating window</div>
+            </div>
+
+            <div class="calorie-mountain" id="calorie-mountain">
+                <div class="calorie-number" id="calorie-number">2200</div>
+                <div class="calorie-label">kcal remaining</div>
+                <div class="zone-indicator" id="zone-indicator">On Track</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" onclick="openFoodLog()">Log Food</button>
+                <button class="btn" onclick="resetDay()">Reset Day</button>
+            </div>
+
+            <div class="daily-summary">
+                <h3>Today's Summary</h3>
+                <div class="summary-item">
+                    <span>Net Calories:</span>
+                    <span id="net-calories">0</span>
+                </div>
+                <div class="summary-item">
+                    <span>Food Logged:</span>
+                    <span id="food-count">0 items</span>
+                </div>
+                <div class="summary-item">
+                    <span>Estimated Weight:</span>
+                    <span id="weight-estimate">No change</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mountain Screen (Long-term Goal) -->
+        <div class="screen" id="mountain-screen">
+            <div class="mountain-display" id="mountain-display">
+                <div class="mountain-number" id="mountain-number">0</div>
+                <div class="mountain-label">calories to goal weight</div>
+                <div class="target-date" id="target-date">
+                    <strong>Target Date:</strong><br>
+                    <span id="goal-date">Set your target weight in settings</span>
+                </div>
+                <div class="progress-info">
+                    <span>Current: <span id="current-weight-display">160 lbs</span></span>
+                    <span>Goal: <span id="goal-weight-display">150 lbs</span></span>
+                </div>
+            </div>
+
+            <div class="daily-summary">
+                <h3>Goal Progress</h3>
+                <div class="summary-item">
+                    <span>Weight to Lose:</span>
+                    <span id="weight-to-lose">10 lbs</span>
+                </div>
+                <div class="summary-item">
+                    <span>Weekly Goal:</span>
+                    <span id="weekly-goal">1 lb/week</span>
+                </div>
+                <div class="summary-item">
+                    <span>Calories Burned Today:</span>
+                    <span id="mountain-burned-today">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Food Log Modal -->
+    <div class="modal" id="foodModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('foodModal')">&times;</button>
+            <h2>Mindful Pause</h2>
+            <p>Why are you eating right now?</p>
+            
+            <button class="reason-btn" onclick="selectReason('hungry')">
+                <strong>I'm hungry and need energy</strong>
+            </button>
+            <button class="reason-btn" onclick="selectReason('enjoying')">
+                <strong>I'm within my range and enjoying something</strong>
+            </button>
+            <button class="reason-btn" onclick="selectReason('bored')">
+                <strong>I'm bored</strong>
+            </button>
+            <button class="reason-btn" onclick="selectReason('stressed')">
+                <strong>I'm stressed/emotional</strong>
+            </button>
+            <button class="reason-btn" onclick="selectReason('habit')">
+                <strong>It's just habit</strong>
+            </button>
+        </div>
+    </div>
+
+    <!-- Calorie Input Modal -->
+    <div class="modal" id="calorieModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('calorieModal')">&times;</button>
+            <h2>Log Your Food</h2>
+            <div class="input-group">
+                <label for="calorieInput">Calories:</label>
+                <input type="number" id="calorieInput" placeholder="Enter calories" min="0">
+            </div>
+            <button class="btn btn-primary" onclick="logFood()">Log Food</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('settingsModal')">&times;</button>
+            <h2>Settings</h2>
+            
+            <div class="input-group">
+                <label for="units">Units:</label>
+                <select id="units" style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 10px; font-size: 16px;">
+                    <option value="imperial">Imperial (lbs, inches)</option>
+                    <option value="metric">Metric (kg, cm)</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" placeholder="30" min="15" max="100">
+            </div>
+            
+            <div class="input-group">
+                <label for="height">Height:</label>
+                <input type="number" id="height" placeholder="70" min="120" max="244">
+                <small id="heightUnit" style="color: #666; font-size: 12px;">inches</small>
+            </div>
+            
+            <div class="input-group">
+                <label for="sex">Sex:</label>
+                <select id="sex" style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 10px; font-size: 16px;">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="currentWeight">Current Weight:</label>
+                <input type="number" id="currentWeight" placeholder="160" min="20" max="227">
+                <small id="weightUnit" style="color: #666; font-size: 12px;">lbs</small>
+            </div>
+            
+            <div class="input-group">
+                <label for="activityLevel">Activity Level:</label>
+                <select id="activityLevel" style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 10px; font-size: 16px;">
+                    <option value="1.2">Sedentary (little or no exercise)</option>
+                    <option value="1.375">Lightly active (light exercise 1-3 days/week)</option>
+                    <option value="1.55" selected>Moderately active (moderate exercise 3-5 days/week)</option>
+                    <option value="1.725">Very active (hard exercise 6-7 days/week)</option>
+                    <option value="1.9">Extra active (very hard exercise, physical job)</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="targetWeight">Target Weight:</label>
+                <input type="number" id="targetWeight" placeholder="150" min="20" max="227">
+                <small id="targetWeightUnit" style="color: #666; font-size: 12px;">lbs</small>
+            </div>
+            
+            <div class="input-group">
+                <label for="weeklyWeightLoss">Weekly Weight Loss Goal:</label>
+                <select id="weeklyWeightLoss" style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 10px; font-size: 16px;">
+                    <option value="0.5">0.5 lbs per week (slow & steady)</option>
+                    <option value="1" selected>1 lb per week (recommended)</option>
+                    <option value="1.5">1.5 lbs per week (moderate)</option>
+                    <option value="2">2 lbs per week (aggressive)</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="startTime">Eating Window Start:</label>
+                <input type="time" id="startTime" value="08:00">
+            </div>
+            
+            <div class="input-group">
+                <label for="endTime">Eating Window End:</label>
+                <input type="time" id="endTime" value="18:00">
+            </div>
+            
+            <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; margin: 20px 0; text-align: center;">
+                <strong>Calculated Daily Calories:</strong>
+                <div id="calculatedCalories" style="font-size: 24px; color: #007bff; margin-top: 5px;">2200 kcal</div>
+                <div id="calculatedBMR" style="font-size: 14px; color: #666; margin-top: 5px;">BMR: 1600 kcal/day</div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let state = {
+            units: 'imperial',
+            age: 30,
+            height: 70, // inches
+            sex: 'male',
+            currentWeight: 160, // lbs
+            activityLevel: 1.55,
+            targetWeight: 150, // lbs
+            weeklyWeightLoss: 1, // lbs per week
+            dailyCalories: 2200,
+            bmr: 1600,
+            burnedCalories: 0,
+            loggedCalories: 0,
+            eatingWindowStart: '08:00',
+            eatingWindowEnd: '18:00',
+            lastReset: new Date().toDateString(),
+            foodEntries: []
+        };
+
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('mindfulWeightTracker');
+            if (saved) {
+                const savedState = JSON.parse(saved);
+                state = { ...state, ...savedState };
+                // Convert date strings back to Date objects
+                state.lastReset = new Date(savedState.lastReset);
+            }
+        }
+
+        // Calculate BMR using Mifflin-St Jeor Equation
+        function calculateBMR(weight, height, age, sex, units) {
+            let weightKg, heightCm;
+            
+            if (units === 'imperial') {
+                weightKg = lbsToKg(weight);
+                heightCm = inchesToCm(height);
+            } else {
+                weightKg = weight;
+                heightCm = height;
+            }
+            
+            if (sex === 'male') {
+                return (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
+            } else {
+                return (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
+            }
+        }
+
+        // Calculate Total Daily Energy Expenditure (TDEE)
+        function calculateTDEE(bmr, activityLevel) {
+            return bmr * activityLevel;
+        }
+
+        // Unit conversion functions
+        function lbsToKg(lbs) {
+            return lbs * 0.453592;
+        }
+
+        function kgToLbs(kg) {
+            return kg * 2.20462;
+        }
+
+        function inchesToCm(inches) {
+            return inches * 2.54;
+        }
+
+        function cmToInches(cm) {
+            return cm / 2.54;
+        }
+
+        // Calculate hourly burn rate
+        function calculateHourlyBurnRate(tdee) {
+            return tdee / 24;
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('mindfulWeightTracker', JSON.stringify(state));
+        }
+
+        // Switch between screens
+        function switchScreen(screen) {
+            // Update navigation tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screen + '-screen').classList.add('active');
+            
+            // Update mountain display if switching to mountain
+            if (screen === 'mountain') {
+                updateMountainDisplay();
+            }
+        }
+
+        // Calculate mountain data
+        function calculateMountainData() {
+            const weightToLose = state.currentWeight - state.targetWeight;
+            const totalCaloriesToBurn = weightToLose * 3500; // 3500 calories = 1 lb
+            const weeklyCaloriesToBurn = state.weeklyWeightLoss * 3500;
+            const dailyCaloriesToBurn = weeklyCaloriesToBurn / 7;
+            const weeksToGoal = weightToLose / state.weeklyWeightLoss;
+            
+            // Calculate target date
+            const targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + (weeksToGoal * 7));
+            
+            return {
+                weightToLose,
+                totalCaloriesToBurn,
+                weeklyCaloriesToBurn,
+                dailyCaloriesToBurn,
+                weeksToGoal,
+                targetDate
+            };
+        }
+
+        // Update mountain display
+        function updateMountainDisplay() {
+            const mountainData = calculateMountainData();
+            
+            document.getElementById('mountain-number').textContent = Math.round(mountainData.totalCaloriesToBurn).toLocaleString();
+            document.getElementById('goal-date').textContent = mountainData.targetDate.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            document.getElementById('current-weight-display').textContent = `${state.currentWeight} ${state.units === 'imperial' ? 'lbs' : 'kg'}`;
+            document.getElementById('goal-weight-display').textContent = `${state.targetWeight} ${state.units === 'imperial' ? 'lbs' : 'kg'}`;
+            document.getElementById('weight-to-lose').textContent = `${mountainData.weightToLose} ${state.units === 'imperial' ? 'lbs' : 'kg'}`;
+            document.getElementById('weekly-goal').textContent = `${state.weeklyWeightLoss} ${state.units === 'imperial' ? 'lb' : 'kg'}/week`;
+            document.getElementById('mountain-burned-today').textContent = Math.round(state.burnedCalories);
+        }
+
+        // Initialize app
+        function init() {
+            loadState();
+            checkDayReset();
+            updateDisplay();
+            updateMountainDisplay();
+            startCalorieBurn();
+            updateEatingWindow();
+            updateTimeDisplay();
+            
+            // Update every minute
+            setInterval(() => {
+                updateDisplay();
+                updateEatingWindow();
+                updateTimeDisplay();
+            }, 60000);
+            
+            // Update time display every second
+            setInterval(() => {
+                updateTimeDisplay();
+            }, 1000);
+        }
+
+        // Check if we need to reset for a new day
+        function checkDayReset() {
+            const today = new Date().toDateString();
+            if (state.lastReset.toDateString() !== today) {
+                resetDay();
+            }
+        }
+
+        // Reset day
+        function resetDay() {
+            state.burnedCalories = 0;
+            state.loggedCalories = 0;
+            state.foodEntries = [];
+            state.lastReset = new Date();
+            saveState();
+            updateDisplay();
+        }
+
+        // Start calorie burn simulation
+        function startCalorieBurn() {
+            // Calculate burn rate based on BMR
+            const hourlyBurnRate = calculateHourlyBurnRate(state.dailyCalories);
+            const burnRate = hourlyBurnRate / 3600; // kcal per second
+            
+            // Update immediately for better responsiveness
+            updateDisplay();
+            
+            setInterval(() => {
+                state.burnedCalories += burnRate;
+                saveState();
+                updateDisplay();
+            }, 1000);
+        }
+
+        // Update time display
+        function updateTimeDisplay() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time-display').textContent = timeString;
+        }
+
+        // Update eating window display
+        function updateEatingWindow() {
+            const now = new Date();
+            const currentTime = now.toTimeString().slice(0, 5);
+            const start = state.eatingWindowStart;
+            const end = state.eatingWindowEnd;
+            
+            const windowStatus = document.getElementById('window-status');
+            const windowMessage = document.getElementById('window-message');
+            
+            windowStatus.textContent = `Eating Window: ${start} - ${end}`;
+            
+            // Convert times to minutes for proper comparison
+            const currentMinutes = parseInt(currentTime.split(':')[0]) * 60 + parseInt(currentTime.split(':')[1]);
+            const startMinutes = parseInt(start.split(':')[0]) * 60 + parseInt(start.split(':')[1]);
+            const endMinutes = parseInt(end.split(':')[0]) * 60 + parseInt(end.split(':')[1]);
+            
+            // Handle overnight eating windows (e.g., 8 PM to 6 AM)
+            let isInWindow = false;
+            if (startMinutes <= endMinutes) {
+                // Same day window (e.g., 8 AM to 6 PM)
+                isInWindow = currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+            } else {
+                // Overnight window (e.g., 8 PM to 6 AM)
+                isInWindow = currentMinutes >= startMinutes || currentMinutes <= endMinutes;
+            }
+            
+            if (isInWindow) {
+                windowMessage.textContent = "You're in your eating window";
+                windowMessage.style.color = '#4caf50';
+            } else {
+                windowMessage.textContent = "Outside eating window - mindful eating only";
+                windowMessage.style.color = '#ff9800';
+            }
+        }
+
+        // Update main display
+        function updateDisplay() {
+            const netCalories = state.dailyCalories - state.burnedCalories + state.loggedCalories;
+            const percentage = Math.max(0, Math.min(100, (netCalories / state.dailyCalories) * 100));
+            
+            const calorieNumber = document.getElementById('calorie-number');
+            calorieNumber.textContent = Math.round(netCalories);
+            calorieNumber.classList.add('live'); // Add live animation
+            
+            document.getElementById('net-calories').textContent = Math.round(state.loggedCalories - state.burnedCalories);
+            document.getElementById('food-count').textContent = `${state.foodEntries.length} items`;
+            
+            // Update progress bar
+            document.getElementById('progress-fill').style.width = `${percentage}%`;
+            
+            // Update zone indicator
+            const zoneIndicator = document.getElementById('zone-indicator');
+            const mountain = document.getElementById('calorie-mountain');
+            
+            if (netCalories <= 0) {
+                zoneIndicator.textContent = 'Deficit';
+                zoneIndicator.className = 'zone-indicator zone-green';
+                mountain.style.background = 'linear-gradient(135deg, #4caf50, #45a049)';
+            } else if (netCalories <= state.dailyCalories * 0.1) {
+                zoneIndicator.textContent = 'On Track';
+                zoneIndicator.className = 'zone-indicator zone-green';
+                mountain.style.background = 'linear-gradient(135deg, #4facfe, #00f2fe)';
+            } else if (netCalories <= state.dailyCalories * 0.2) {
+                zoneIndicator.textContent = 'Neutral';
+                zoneIndicator.className = 'zone-indicator zone-yellow';
+                mountain.style.background = 'linear-gradient(135deg, #ffd89b, #19547b)';
+            } else {
+                zoneIndicator.textContent = 'Surplus';
+                zoneIndicator.className = 'zone-indicator zone-red';
+                mountain.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a24)';
+            }
+            
+            // Update weight estimate
+            const netCaloriesForWeight = state.loggedCalories - state.burnedCalories;
+            const weightChange = netCaloriesForWeight / 3500; // 3500 calories = 1 lb
+            const weightEstimate = document.getElementById('weight-estimate');
+            
+            if (Math.abs(weightChange) < 0.01) {
+                weightEstimate.textContent = 'No change';
+            } else {
+                const changeText = weightChange > 0 ? '+' : '';
+                weightEstimate.textContent = `${changeText}${weightChange.toFixed(2)} lbs`;
+            }
+            
+            // Check for warnings
+            checkWarnings(netCalories);
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function openFoodLog() {
+            const now = new Date();
+            const currentTime = now.toTimeString().slice(0, 5);
+            const start = state.eatingWindowStart;
+            const end = state.eatingWindowEnd;
+            
+            if (currentTime < start || currentTime > end) {
+                alert('You\'re outside your eating window. Consider if you really need to eat right now.');
+            }
+            
+            openModal('foodModal');
+        }
+
+        function openSettings() {
+            document.getElementById('units').value = state.units;
+            document.getElementById('age').value = state.age;
+            document.getElementById('height').value = state.height;
+            document.getElementById('sex').value = state.sex;
+            document.getElementById('currentWeight').value = state.currentWeight;
+            document.getElementById('activityLevel').value = state.activityLevel;
+            document.getElementById('targetWeight').value = state.targetWeight;
+            document.getElementById('weeklyWeightLoss').value = state.weeklyWeightLoss;
+            document.getElementById('startTime').value = state.eatingWindowStart;
+            document.getElementById('endTime').value = state.eatingWindowEnd;
+            
+            updateUnitLabels();
+            updateBMRDisplay();
+            
+            // Add event listeners for real-time updates
+            document.getElementById('units').addEventListener('change', handleUnitChange);
+            document.getElementById('age').addEventListener('input', updateBMRDisplay);
+            document.getElementById('height').addEventListener('input', updateBMRDisplay);
+            document.getElementById('sex').addEventListener('change', updateBMRDisplay);
+            document.getElementById('currentWeight').addEventListener('input', updateBMRDisplay);
+            document.getElementById('activityLevel').addEventListener('change', updateBMRDisplay);
+            
+            openModal('settingsModal');
+        }
+
+        // Mindful pause functionality
+        function selectReason(reason) {
+            const nonHungerReasons = ['bored', 'stressed', 'habit'];
+            const redirects = [
+                "Drink a full glass of water and try again in 5 minutes.",
+                "Take 3 deep breaths and check in with your body.",
+                "Name 3 things you can see, hear, and feel right now.",
+                "Text a friend something kind.",
+                "Do 10 jumping jacks or a quick stretch.",
+                "Write down what you're feeling in a journal.",
+                "Go for a 5-minute walk outside."
+            ];
+            
+            if (nonHungerReasons.includes(reason)) {
+                const redirect = redirects[Math.floor(Math.random() * redirects.length)];
+                alert(`Mindful Redirect: ${redirect}`);
+                closeModal('foodModal');
+                return;
+            }
+            
+            // If it's a hunger reason, proceed to calorie input
+            closeModal('foodModal');
+            openModal('calorieModal');
+        }
+
+        // Log food
+        function logFood() {
+            const calories = parseInt(document.getElementById('calorieInput').value);
+            if (isNaN(calories) || calories <= 0) {
+                alert('Please enter a valid calorie amount.');
+                return;
+            }
+            
+            state.loggedCalories += calories;
+            state.foodEntries.push({
+                calories: calories,
+                timestamp: new Date().toISOString()
+            });
+            
+            saveState();
+            updateDisplay();
+            closeModal('calorieModal');
+            document.getElementById('calorieInput').value = '';
+        }
+
+        // Update unit labels
+        function updateUnitLabels() {
+            const units = document.getElementById('units').value;
+            const heightUnit = units === 'imperial' ? 'inches' : 'cm';
+            const weightUnit = units === 'imperial' ? 'lbs' : 'kg';
+            
+            document.getElementById('heightUnit').textContent = heightUnit;
+            document.getElementById('weightUnit').textContent = weightUnit;
+            document.getElementById('targetWeightUnit').textContent = weightUnit;
+            
+            // Update input ranges
+            const heightInput = document.getElementById('height');
+            const weightInput = document.getElementById('currentWeight');
+            const targetWeightInput = document.getElementById('targetWeight');
+            
+            if (units === 'imperial') {
+                heightInput.min = '48'; heightInput.max = '96'; heightInput.placeholder = '70';
+                weightInput.min = '50'; weightInput.max = '500'; weightInput.placeholder = '160';
+                targetWeightInput.min = '50'; targetWeightInput.max = '500'; targetWeightInput.placeholder = '150';
+            } else {
+                heightInput.min = '120'; heightInput.max = '244'; heightInput.placeholder = '178';
+                weightInput.min = '20'; weightInput.max = '227'; weightInput.placeholder = '73';
+                targetWeightInput.min = '20'; targetWeightInput.max = '227'; targetWeightInput.placeholder = '68';
+            }
+        }
+
+        // Handle unit change
+        function handleUnitChange() {
+            const units = document.getElementById('units').value;
+            const heightInput = document.getElementById('height');
+            const weightInput = document.getElementById('currentWeight');
+            const targetWeightInput = document.getElementById('targetWeight');
+            
+            // Convert current values
+            if (units === 'metric' && state.units === 'imperial') {
+                // Convert from imperial to metric
+                heightInput.value = Math.round(inchesToCm(parseFloat(heightInput.value || state.height)));
+                weightInput.value = Math.round(lbsToKg(parseFloat(weightInput.value || state.currentWeight)));
+                targetWeightInput.value = Math.round(lbsToKg(parseFloat(targetWeightInput.value || state.targetWeight)));
+            } else if (units === 'imperial' && state.units === 'metric') {
+                // Convert from metric to imperial
+                heightInput.value = Math.round(cmToInches(parseFloat(heightInput.value || state.height)));
+                weightInput.value = Math.round(kgToLbs(parseFloat(weightInput.value || state.currentWeight)));
+                targetWeightInput.value = Math.round(kgToLbs(parseFloat(targetWeightInput.value || state.targetWeight)));
+            }
+            
+            state.units = units;
+            updateUnitLabels();
+            updateBMRDisplay();
+        }
+
+        // Update BMR display
+        function updateBMRDisplay() {
+            const age = parseInt(document.getElementById('age').value) || state.age;
+            const height = parseInt(document.getElementById('height').value) || state.height;
+            const sex = document.getElementById('sex').value;
+            const currentWeight = parseInt(document.getElementById('currentWeight').value) || state.currentWeight;
+            const activityLevel = parseFloat(document.getElementById('activityLevel').value);
+            const units = document.getElementById('units').value;
+            
+            const bmr = calculateBMR(currentWeight, height, age, sex, units);
+            const tdee = calculateTDEE(bmr, activityLevel);
+            const hourlyBurn = calculateHourlyBurnRate(tdee);
+            
+            document.getElementById('calculatedBMR').textContent = `BMR: ${Math.round(bmr)} kcal/day`;
+            document.getElementById('calculatedCalories').textContent = `${Math.round(tdee)} kcal`;
+        }
+
+        // Save settings
+        function saveSettings() {
+            const units = document.getElementById('units').value;
+            const age = parseInt(document.getElementById('age').value);
+            const height = parseInt(document.getElementById('height').value);
+            const sex = document.getElementById('sex').value;
+            const currentWeight = parseInt(document.getElementById('currentWeight').value);
+            const activityLevel = parseFloat(document.getElementById('activityLevel').value);
+            const targetWeight = parseInt(document.getElementById('targetWeight').value);
+            const weeklyWeightLoss = parseFloat(document.getElementById('weeklyWeightLoss').value);
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            
+            if (isNaN(age) || isNaN(height) || isNaN(currentWeight) || isNaN(targetWeight)) {
+                alert('Please enter valid numbers for all fields.');
+                return;
+            }
+            
+            state.units = units;
+            state.age = age;
+            state.height = height;
+            state.sex = sex;
+            state.currentWeight = currentWeight;
+            state.activityLevel = activityLevel;
+            state.targetWeight = targetWeight;
+            state.weeklyWeightLoss = weeklyWeightLoss;
+            state.eatingWindowStart = startTime;
+            state.eatingWindowEnd = endTime;
+            
+            // Calculate new BMR and daily calories
+            const bmr = calculateBMR(currentWeight, height, age, sex, units);
+            const tdee = calculateTDEE(bmr, activityLevel);
+            
+            state.bmr = bmr;
+            state.dailyCalories = Math.round(tdee);
+            
+            saveState();
+            updateDisplay();
+            updateMountainDisplay();
+            updateEatingWindow();
+            closeModal('settingsModal');
+        }
+
+        // Check for warnings
+        function checkWarnings(netCalories) {
+            // Use net calories from summary (logged - burned)
+            const netCaloriesForSummary = state.loggedCalories - state.burnedCalories;
+            
+            // Remove existing warnings
+            const existingWarning = document.querySelector('.warning-banner');
+            if (existingWarning) {
+                existingWarning.remove();
+            }
+            
+            // Check for high calorie surplus - sustained warning
+            if (netCaloriesForSummary > 500) {
+                const warning = document.createElement('div');
+                warning.className = 'warning-banner';
+                warning.textContent = '⚠️ High surplus - stay balanced!';
+                document.body.appendChild(warning);
+            }
+            
+            // Check for low calorie intake - sustained warning
+            if (netCaloriesForSummary < -1000) {
+                const warning = document.createElement('div');
+                warning.className = 'warning-banner low-calories';
+                warning.textContent = '⚠️ Low intake - eat enough nutrients!';
+                document.body.appendChild(warning);
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Add event listeners for real-time BMR updates
+        document.addEventListener('DOMContentLoaded', function() {
+            // These will be added when the modal opens
+        });
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html> 

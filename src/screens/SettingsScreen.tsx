@@ -10,8 +10,8 @@ import {
   Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
+// import { LinearGradient } from 'expo-linear-gradient';
+// import * as Haptics from 'expo-haptics';
 import { useCalorie } from '../context/CalorieContext';
 
 const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
@@ -47,14 +47,14 @@ const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       bmr,
     });
 
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert('Success', 'Settings saved successfully!', [
       { text: 'OK', onPress: () => navigation.goBack() }
     ]);
   };
 
   const handleCancel = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.goBack();
   };
 
@@ -195,10 +195,7 @@ const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       {showTimePicker && (
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <LinearGradient
-              colors={['#16213e', '#0f172a']}
-              style={styles.modalContent}
-            >
+                          <View style={[styles.modalContent, { backgroundColor: '#16213e' }]}>
               <Text style={styles.modalTitle}>
                 Select {showTimePicker === 'start' ? 'Start' : 'End'} Time
               </Text>
@@ -221,7 +218,7 @@ const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               >
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
-            </LinearGradient>
+                          </View>
           </View>
         </View>
       )}

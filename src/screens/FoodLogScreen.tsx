@@ -11,8 +11,8 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
+// import { LinearGradient } from 'expo-linear-gradient';
+// import * as Haptics from 'expo-haptics';
 import { useCalorie } from '../context/CalorieContext';
 
 const FoodLogScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
@@ -48,7 +48,7 @@ const FoodLogScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       return;
     }
     
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setShowReasonModal(true);
   };
 
@@ -68,10 +68,10 @@ const FoodLogScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           {
             text: 'I understand',
             onPress: () => {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              setShowReasonModal(false);
-              setCalories('');
-              setSelectedReason('');
+                    // Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setShowReasonModal(false);
+      setCalories('');
+      setSelectedReason('');
             },
           },
         ]
@@ -80,13 +80,13 @@ const FoodLogScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       // Proceed with logging
       const reasonLabel = eatingReasons.find(r => r.id === reason)?.label || reason;
       addFoodEntry(Number(calories), reasonLabel);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      // Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       navigation.goBack();
     }
   };
 
   const handleCancel = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.goBack();
   };
 
@@ -108,10 +108,7 @@ const FoodLogScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
           {/* Main Content */}
           <View style={styles.content}>
-            <LinearGradient
-              colors={['#3b82f6', '#1d4ed8']}
-              style={styles.calorieInputContainer}
-            >
+            <View style={[styles.calorieInputContainer, { backgroundColor: '#3b82f6' }]}>
               <Text style={styles.inputLabel}>How many calories?</Text>
               <TextInput
                 style={styles.calorieInput}
@@ -130,7 +127,7 @@ const FoodLogScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               >
                 <Text style={styles.submitText}>Continue</Text>
               </TouchableOpacity>
-            </LinearGradient>
+            </View>
 
             {/* Mindful Reminder */}
             <View style={styles.reminderContainer}>
@@ -146,10 +143,7 @@ const FoodLogScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         {showReasonModal && (
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
-              <LinearGradient
-                colors={['#16213e', '#0f172a']}
-                style={styles.modalContent}
-              >
+              <View style={[styles.modalContent, { backgroundColor: '#16213e' }]}>
                 <Text style={styles.modalTitle}>Why are you eating?</Text>
                 <Text style={styles.modalSubtitle}>
                   This helps build mindful awareness
@@ -177,7 +171,7 @@ const FoodLogScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 >
                   <Text style={styles.cancelText}>Cancel</Text>
                 </TouchableOpacity>
-              </LinearGradient>
+              </View>
             </View>
           </View>
         )}

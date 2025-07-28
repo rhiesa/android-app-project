@@ -9,8 +9,8 @@ import {
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
+// import { LinearGradient } from 'expo-linear-gradient';
+// import * as Haptics from 'expo-haptics';
 import { useCalorie } from '../context/CalorieContext';
 
 const { width, height } = Dimensions.get('window');
@@ -65,20 +65,20 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const handleAddFood = () => {
     if (!isWithinEatingWindow) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      // Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       return;
     }
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     navigation.navigate('FoodLog');
   };
 
   const handleSettings = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate('Settings');
   };
 
   const handleResetDay = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     resetDay();
   };
 
@@ -112,34 +112,26 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
       {/* Eating Window Indicator */}
       <View style={styles.eatingWindowContainer}>
-        <LinearGradient
-          colors={isWithinEatingWindow ? ['#4ade80', '#22c55e'] : ['#6b7280', '#4b5563']}
-          style={styles.eatingWindowIndicator}
-        >
+        <View style={[styles.eatingWindowIndicator, { backgroundColor: isWithinEatingWindow ? '#4ade80' : '#6b7280' }]}>
           <Text style={styles.eatingWindowText}>
             {isWithinEatingWindow ? '🍽️ Eating Window Open' : '⏰ Outside Eating Window'}
           </Text>
           <Text style={styles.eatingWindowTime}>
             {state.settings.eatingWindowStart} - {state.settings.eatingWindowEnd}
           </Text>
-        </LinearGradient>
+        </View>
       </View>
 
       {/* Calorie Mountain */}
       <View style={styles.calorieContainer}>
-        <LinearGradient
-          colors={getZoneColors()}
-          style={styles.calorieMountain}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
+        <View style={[styles.calorieMountain, { backgroundColor: getZoneColors()[0] }]}>
           <Animated.View style={[styles.calorieContent, { transform: [{ scale: scaleAnim }] }]}>
             <Text style={styles.calorieNumber}>
               {Math.round(state.currentCalories).toLocaleString()}
             </Text>
             <Text style={styles.calorieLabel}>calories remaining</Text>
           </Animated.View>
-        </LinearGradient>
+        </View>
         
         <Text style={styles.zoneMessage}>{getZoneMessage()}</Text>
       </View>
@@ -154,13 +146,10 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           onPress={handleAddFood}
           disabled={!isWithinEatingWindow}
         >
-          <LinearGradient
-            colors={isWithinEatingWindow ? ['#3b82f6', '#1d4ed8'] : ['#6b7280', '#4b5563']}
-            style={styles.addFoodGradient}
-          >
+          <View style={[styles.addFoodGradient, { backgroundColor: isWithinEatingWindow ? '#3b82f6' : '#6b7280' }]}>
             <Text style={styles.addFoodIcon}>🍎</Text>
             <Text style={styles.addFoodText}>Log Food</Text>
-          </LinearGradient>
+          </View>
         </TouchableOpacity>
       </View>
 
