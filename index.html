@@ -362,6 +362,54 @@
             border-color: #007bff;
         }
 
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .toggle-label {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-label:hover {
+            background: #b0b0b0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #midnightBurnMode:checked + .toggle-label {
+            background: #4caf50;
+        }
+
+        #midnightBurnMode:checked + .toggle-label .toggle-slider {
+            transform: translateX(26px);
+        }
+
+        .toggle-text {
+            font-size: 14px;
+            color: #666;
+            flex: 1;
+        }
+
         .close-btn {
             position: absolute;
             top: 15px;
@@ -483,8 +531,8 @@
         </div>
 
         <div class="navigation-tabs">
-            <button class="nav-tab active" onclick="switchScreen('forest')">🌲 Forest</button>
-            <button class="nav-tab" onclick="switchScreen('mountain')">⛰️ Mountain</button>
+            <button class="nav-tab active" onclick="switchScreen('forest')">🌲 Trees</button>
+            <button class="nav-tab" onclick="switchScreen('mountain')">🌳 Forest</button>
         </div>
 
         <!-- Forest Screen (Daily View) -->
@@ -496,7 +544,7 @@
 
             <div class="calorie-mountain" id="calorie-mountain">
                 <div class="calorie-number" id="calorie-number">2200</div>
-                <div class="calorie-label">kcal remaining</div>
+                <div class="calorie-label">net calories</div>
                 <div class="zone-indicator" id="zone-indicator">On Track</div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress-fill"></div>
@@ -519,7 +567,7 @@
                 <span id="calories-logged">0 kcal</span>
             </div>
             <div class="summary-item">
-                <span>Net Calories:</span>
+                <span>TDEE Kcal to Burn:</span>
                 <span id="net-calories">0</span>
             </div>
             <div class="summary-item">
@@ -756,6 +804,17 @@
             </div>
             
             <div class="input-group">
+                <label for="midnightBurnMode">Midnight Burn Mode:</label>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="midnightBurnMode" style="display: none;">
+                    <label for="midnightBurnMode" class="toggle-label">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-text">Start at 0 at midnight, burn until eating window ends</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
                 <label for="startTime">Eating Window Start:</label>
                 <input type="time" id="startTime" value="08:00">
             </div>
@@ -772,6 +831,37 @@
             </div>
             
             <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+            
+            <!-- Debug Section -->
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 15px; margin: 20px 0;">
+                <h4 style="margin: 0 0 15px 0; color: #856404;">🐛 Debug Tools</h4>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <button class="btn" style="background: #dc3545; color: white;" onclick="resetDay()">Reset Day</button>
+                    <button class="btn" style="background: #6c757d; color: white;" onclick="addTestData()">Add Test Data</button>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <div>
+                        <label style="font-size: 12px; color: #666;">Set Time (HH:MM):</label>
+                        <input type="time" id="debugTime" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #666;">Hours +/-:</label>
+                        <input type="number" id="debugHours" placeholder="0" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn" style="background: #17a2b8; color: white;" onclick="setDebugTime()">Set Time</button>
+                    <button class="btn" style="background: #28a745; color: white;" onclick="adjustDebugTime()">Adjust Hours</button>
+                </div>
+                
+                <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 12px; color: #666;">
+                    <strong>Current Debug Info:</strong><br>
+                    <span id="debugInfo">Loading...</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -793,6 +883,7 @@
             exerciseCalories: 0,
             eatingWindowStart: '08:00',
             eatingWindowEnd: '18:00',
+            midnightBurnMode: false,
             lastReset: new Date().toDateString(),
             foodEntries: [],
             exerciseEntries: [],
@@ -969,17 +1060,21 @@
 
         // Start calorie burn simulation
         function startCalorieBurn() {
-            // Calculate burn rate based on BMR
-            const hourlyBurnRate = calculateHourlyBurnRate(state.dailyCalories);
-            const burnRate = hourlyBurnRate / 3600; // kcal per second
-            
             // Update immediately for better responsiveness
             updateDisplay();
             
             setInterval(() => {
-                state.burnedCalories += burnRate;
-                saveState();
-                updateDisplay();
+                if (state.midnightBurnMode) {
+                    // Midnight burn mode - calculate based on time since midnight
+                    updateMidnightBurnMode();
+                } else {
+                    // Regular burn mode (80 kcal/hour)
+                    const hourlyBurnRate = calculateHourlyBurnRate(state.dailyCalories);
+                    const burnRate = hourlyBurnRate / 3600; // kcal per second
+                    state.burnedCalories += burnRate;
+                    saveState();
+                    updateDisplay();
+                }
             }, 1000);
         }
 
@@ -992,6 +1087,31 @@
                 hour12: true 
             });
             document.getElementById('time-display').textContent = timeString;
+        }
+
+        // Update midnight burn mode
+        function updateMidnightBurnMode() {
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+            const timeSinceMidnight = (now - midnight) / 1000 / 60; // minutes since midnight
+            
+            // Parse eating window end time
+            const endTimeParts = state.eatingWindowEnd.split(':');
+            const endHour = parseInt(endTimeParts[0]);
+            const endMinute = parseInt(endTimeParts[1]);
+            const endTimeMinutes = endHour * 60 + endMinute;
+            
+            // Calculate total burn period (midnight to end of eating window)
+            const totalBurnPeriod = endTimeMinutes; // minutes from midnight to end of eating window
+            
+            // Calculate how much of the day's calories should be burned by now
+            const burnProgress = Math.min(timeSinceMidnight / totalBurnPeriod, 1);
+            const shouldHaveBurned = state.dailyCalories * burnProgress;
+            
+            // Update burned calories
+            state.burnedCalories = shouldHaveBurned;
+            saveState();
+            updateDisplay();
         }
 
         // Update eating window display
@@ -1032,6 +1152,7 @@
 
         // Update main display
         function updateDisplay() {
+            console.log('updateDisplay called - logged:', state.loggedCalories, 'burned:', state.burnedCalories, 'exercise:', state.exerciseCalories);
             // Calculate weight loss target calories
             const weeklyCalorieDeficit = state.weeklyWeightLoss * 3500; // calories per week
             const dailyCalorieDeficit = weeklyCalorieDeficit / 7; // calories per day
@@ -1059,18 +1180,22 @@
                 }
             }
             
-            // Calculate net calories including exercise (logged - burned - exercise)
+            // Calculate net calories (logged - burned - exercise)
             const netCalories = state.loggedCalories - state.burnedCalories - state.exerciseCalories;
-            const percentage = Math.max(0, Math.min(100, ((state.dailyCalories - state.burnedCalories + state.loggedCalories - state.exerciseCalories) / state.dailyCalories) * 100));
+            
+            // Calculate body metabolism (daily calories - burned + logged - exercise)
+            const bodyMetabolism = state.dailyCalories - state.burnedCalories + state.loggedCalories - state.exerciseCalories;
+            
+            const percentage = Math.max(0, Math.min(100, (bodyMetabolism / state.dailyCalories) * 100));
             
             const calorieNumber = document.getElementById('calorie-number');
-            calorieNumber.textContent = Math.round(state.dailyCalories - state.burnedCalories + state.loggedCalories - state.exerciseCalories);
+            calorieNumber.textContent = Math.round(netCalories);
             calorieNumber.classList.add('live'); // Add live animation
             
             // Update summary fields
             document.getElementById('calorie-target').textContent = `${Math.round(weightLossTarget)} kcal`;
             document.getElementById('calories-logged').textContent = `${Math.round(state.loggedCalories)} kcal`;
-            document.getElementById('net-calories').textContent = Math.round(netCalories);
+            document.getElementById('net-calories').textContent = Math.round(bodyMetabolism);
             document.getElementById('food-count').textContent = `${state.foodEntries.length} items`;
             
             // Update progress bar
@@ -1159,6 +1284,7 @@
                 return;
             }
             
+            console.log('logExercise called with calories:', calories);
             state.exerciseCalories += calories;
             state.exerciseEntries.push({
                 type: type,
@@ -1188,9 +1314,11 @@
             document.getElementById('weeklyWeightLoss').value = state.weeklyWeightLoss;
             document.getElementById('startTime').value = state.eatingWindowStart;
             document.getElementById('endTime').value = state.eatingWindowEnd;
+            document.getElementById('midnightBurnMode').checked = state.midnightBurnMode;
             
             updateUnitLabels();
             updateBMRDisplay();
+            updateDebugInfo();
             
             // Add event listeners for real-time updates
             document.getElementById('units').addEventListener('change', handleUnitChange);
@@ -1342,6 +1470,7 @@
                 return;
             }
             
+            console.log('logFood called with calories:', calories);
             state.loggedCalories += calories;
             state.foodEntries.push({
                 calories: calories,
@@ -1434,6 +1563,7 @@
             const weeklyWeightLoss = parseFloat(document.getElementById('weeklyWeightLoss').value);
             const startTime = document.getElementById('startTime').value;
             const endTime = document.getElementById('endTime').value;
+            const midnightBurnMode = document.getElementById('midnightBurnMode').checked;
             
             if (isNaN(age) || isNaN(height) || isNaN(currentWeight) || isNaN(targetWeight)) {
                 alert('Please enter valid numbers for all fields.');
@@ -1450,6 +1580,7 @@
             state.weeklyWeightLoss = weeklyWeightLoss;
             state.eatingWindowStart = startTime;
             state.eatingWindowEnd = endTime;
+            state.midnightBurnMode = midnightBurnMode;
             
             // Calculate new BMR and daily calories
             const bmr = calculateBMR(currentWeight, height, age, sex, units);
@@ -1529,6 +1660,110 @@
         document.addEventListener('DOMContentLoaded', function() {
             // These will be added when the modal opens
         });
+
+        // Debug functions
+        let debugTimeOffset = 0; // hours offset for debugging
+
+        function addTestData() {
+            // Add some test food and exercise data
+            state.loggedCalories = 800;
+            state.exerciseCalories = 200;
+            state.foodEntries = [
+                { calories: 400, reason: 'hungry', timestamp: new Date().toISOString() },
+                { calories: 400, reason: 'enjoying', timestamp: new Date().toISOString() }
+            ];
+            state.exerciseEntries = [
+                { type: 'Walking', duration: 30, calories: 200, feeling: 'energizing', timestamp: new Date().toISOString() }
+            ];
+            saveState();
+            updateDisplay();
+            updateDebugInfo();
+        }
+
+        function setDebugTime() {
+            const timeInput = document.getElementById('debugTime').value;
+            if (timeInput) {
+                const [hours, minutes] = timeInput.split(':').map(Number);
+                const now = new Date();
+                const targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+                debugTimeOffset = (targetTime - now) / (1000 * 60 * 60); // hours difference
+                updateDebugInfo();
+            }
+        }
+
+        function adjustDebugTime() {
+            const hoursInput = document.getElementById('debugHours').value;
+            if (hoursInput) {
+                debugTimeOffset += parseFloat(hoursInput);
+                updateDebugInfo();
+            }
+        }
+
+        function updateDebugInfo() {
+            const now = new Date();
+            const debugTime = new Date(now.getTime() + (debugTimeOffset * 60 * 60 * 1000));
+            const debugInfo = document.getElementById('debugInfo');
+            
+            if (debugInfo) {
+                debugInfo.innerHTML = `
+                    <strong>Current Time:</strong> ${now.toLocaleTimeString()}<br>
+                    <strong>Debug Time:</strong> ${debugTime.toLocaleTimeString()}<br>
+                    <strong>Offset:</strong> ${debugTimeOffset.toFixed(1)} hours<br>
+                    <strong>Burned:</strong> ${Math.round(state.burnedCalories)} kcal<br>
+                    <strong>Logged:</strong> ${Math.round(state.loggedCalories)} kcal<br>
+                    <strong>Exercise:</strong> ${Math.round(state.exerciseCalories)} kcal<br>
+                    <strong>Midnight Mode:</strong> ${state.midnightBurnMode ? 'ON' : 'OFF'}
+                `;
+            }
+        }
+
+        // Override the time display function for debugging
+        const originalUpdateTimeDisplay = updateTimeDisplay;
+        updateTimeDisplay = function() {
+            if (debugTimeOffset !== 0) {
+                const now = new Date();
+                const debugTime = new Date(now.getTime() + (debugTimeOffset * 60 * 60 * 1000));
+                const timeString = debugTime.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit',
+                    hour12: true 
+                });
+                document.getElementById('time-display').textContent = timeString;
+            } else {
+                originalUpdateTimeDisplay();
+            }
+        };
+
+        // Override the midnight burn mode for debugging
+        const originalUpdateMidnightBurnMode = updateMidnightBurnMode;
+        updateMidnightBurnMode = function() {
+            if (debugTimeOffset !== 0) {
+                const now = new Date();
+                const debugTime = new Date(now.getTime() + (debugTimeOffset * 60 * 60 * 1000));
+                const midnight = new Date(debugTime.getFullYear(), debugTime.getMonth(), debugTime.getDate(), 0, 0, 0);
+                const timeSinceMidnight = (debugTime - midnight) / 1000 / 60; // minutes since midnight
+                
+                // Parse eating window end time
+                const endTimeParts = state.eatingWindowEnd.split(':');
+                const endHour = parseInt(endTimeParts[0]);
+                const endMinute = parseInt(endTimeParts[1]);
+                const endTimeMinutes = endHour * 60 + endMinute;
+                
+                // Calculate total burn period (midnight to end of eating window)
+                const totalBurnPeriod = endTimeMinutes; // minutes from midnight to end of eating window
+                
+                // Calculate how much of the day's calories should be burned by now
+                const burnProgress = Math.min(timeSinceMidnight / totalBurnPeriod, 1);
+                const shouldHaveBurned = state.dailyCalories * burnProgress;
+                
+                // Update burned calories
+                state.burnedCalories = shouldHaveBurned;
+                saveState();
+                updateDisplay();
+            } else {
+                originalUpdateMidnightBurnMode();
+            }
+        };
 
         // Initialize the app
         init();
