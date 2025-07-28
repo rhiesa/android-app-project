@@ -381,6 +381,21 @@
             backdrop-filter: blur(10px);
         }
 
+        .faq-btn {
+            position: absolute;
+            top: 20px;
+            right: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
         .time-display {
             position: absolute;
             top: 20px;
@@ -452,6 +467,7 @@
 <body>
     <div class="container">
         <div class="time-display" id="time-display">12:08 AM</div>
+        <button class="faq-btn" onclick="openFAQ()">❓</button>
         <button class="settings-btn" onclick="openSettings()">⚙️</button>
         
         <div class="header">
@@ -482,24 +498,32 @@
 
             <div class="actions">
                 <button class="btn btn-primary" onclick="openFoodLog()">Log Food</button>
-                <button class="btn" onclick="resetDay()">Reset Day</button>
+                <button class="btn" onclick="openExercise()">Add Exercise</button>
             </div>
 
-            <div class="daily-summary">
-                <h3>Today's Summary</h3>
-                <div class="summary-item">
-                    <span>Net Calories:</span>
-                    <span id="net-calories">0</span>
-                </div>
-                <div class="summary-item">
-                    <span>Food Logged:</span>
-                    <span id="food-count">0 items</span>
-                </div>
-                <div class="summary-item">
-                    <span>Estimated Weight:</span>
-                    <span id="weight-estimate">No change</span>
-                </div>
+                    <div class="daily-summary">
+            <h3>Today's Summary</h3>
+            <div class="summary-item">
+                <span>Calorie Target:</span>
+                <span id="calorie-target">2200 kcal</span>
             </div>
+            <div class="summary-item">
+                <span>Calories Logged:</span>
+                <span id="calories-logged">0 kcal</span>
+            </div>
+            <div class="summary-item">
+                <span>Net Calories:</span>
+                <span id="net-calories">0</span>
+            </div>
+            <div class="summary-item">
+                <span>Food Logged:</span>
+                <span id="food-count">0 items</span>
+            </div>
+            <div class="summary-item">
+                <span>Estimated Weight:</span>
+                <span id="weight-estimate">No change</span>
+            </div>
+        </div>
         </div>
 
         <!-- Mountain Screen (Long-term Goal) -->
@@ -530,6 +554,10 @@
                 <div class="summary-item">
                     <span>Calories Burned Today:</span>
                     <span id="mountain-burned-today">0</span>
+                </div>
+                <div class="summary-item">
+                    <span>Exercise Calories:</span>
+                    <span id="mountain-exercise-today">0</span>
                 </div>
             </div>
         </div>
@@ -570,6 +598,87 @@
                 <input type="number" id="calorieInput" placeholder="Enter calories" min="0">
             </div>
             <button class="btn btn-primary" onclick="logFood()">Log Food</button>
+        </div>
+    </div>
+
+    <!-- FAQ Modal -->
+    <div class="modal" id="faqModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('faqModal')">&times;</button>
+            <h2>FAQ & Logging Philosophy</h2>
+            
+            <div style="text-align: left; margin-bottom: 30px;">
+                <h3 style="color: #007bff; margin-bottom: 15px;">Why doesn't this app have a food scanner or barcode lookup?</h3>
+                <p style="line-height: 1.6; margin-bottom: 20px;">
+                    We chose not to include those on purpose. Scanning can make tracking feel automatic, like you're going through the motions. It often skips the part where you actually think about what and how much you're eating.
+                </p>
+                <p style="line-height: 1.6; margin-bottom: 20px;">
+                    This app is built to help you get comfortable with your food. That means preparing meals you understand, portioning things in a way that makes sense to you, and learning what amounts feel good in your body. Once you've done that a few times, logging becomes quick and simple. The more familiar your meals become, the easier it is to track them without stress.
+                </p>
+            </div>
+
+            <div style="text-align: left; margin-bottom: 30px;">
+                <h3 style="color: #007bff; margin-bottom: 15px;">Tips for Building the Habit</h3>
+                <ul style="line-height: 1.8; padding-left: 20px;">
+                    <li><strong>Log before you eat.</strong> Even a few seconds of pause can make a big difference.</li>
+                    <li><strong>Save meals you eat regularly.</strong> Having them ready saves time and effort.</li>
+                    <li><strong>Portion your food ahead of time.</strong> It's easier to track what's already measured.</li>
+                    <li><strong>Estimate when needed.</strong> "This lunch is about 600" is a solid way to stay consistent.</li>
+                    <li><strong>If you're unsure, it's fine to round slightly up.</strong></li>
+                    <li><strong>If you forget, log it anyway.</strong> A rough log is still helpful.</li>
+                </ul>
+            </div>
+
+            <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; text-align: center; font-style: italic; color: #666;">
+                <strong>This app is here to support calm, confident eating. Not perfection. Just practice. One meal at a time.</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exercise Modal -->
+    <div class="modal" id="exerciseModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('exerciseModal')">&times;</button>
+            <h2>Add Exercise</h2>
+            
+            <div class="input-group">
+                <label for="exerciseType">Type of Activity:</label>
+                <select id="exerciseType" style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 10px; font-size: 16px;">
+                    <option value="Walking">Walking</option>
+                    <option value="Running">Running</option>
+                    <option value="Cycling">Cycling</option>
+                    <option value="Swimming">Swimming</option>
+                    <option value="Weight Training">Weight Training</option>
+                    <option value="Yoga">Yoga</option>
+                    <option value="Dancing">Dancing</option>
+                    <option value="Hiking">Hiking</option>
+                    <option value="Basketball">Basketball</option>
+                    <option value="Tennis">Tennis</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="exerciseDuration">Duration (minutes):</label>
+                <input type="number" id="exerciseDuration" placeholder="30" min="1" max="300">
+            </div>
+            
+            <div class="input-group">
+                <label for="exerciseCalories">Estimated Calories Burned:</label>
+                <input type="number" id="exerciseCalories" placeholder="150" min="1" max="1000">
+            </div>
+            
+            <div class="input-group">
+                <label for="exerciseFeeling">How did it feel?</label>
+                <select id="exerciseFeeling" style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 10px; font-size: 16px;">
+                    <option value="energizing">Energizing</option>
+                    <option value="tiring">Tiring but worth it</option>
+                    <option value="moved">Just moved a bit</option>
+                    <option value="off">Felt off today</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-primary" onclick="logExercise()">Add Exercise</button>
         </div>
     </div>
 
@@ -674,10 +783,13 @@
             bmr: 1600,
             burnedCalories: 0,
             loggedCalories: 0,
+            exerciseCalories: 0,
             eatingWindowStart: '08:00',
             eatingWindowEnd: '18:00',
             lastReset: new Date().toDateString(),
-            foodEntries: []
+            foodEntries: [],
+            exerciseEntries: [],
+            unsafeTargetWarningShown: false
         };
 
         // Load state from localStorage
@@ -784,7 +896,13 @@
         function updateMountainDisplay() {
             const mountainData = calculateMountainData();
             
-            document.getElementById('mountain-number').textContent = Math.round(mountainData.totalCaloriesToBurn).toLocaleString();
+            // Calculate remaining calories (total - burned today - exercise)
+            const remainingCalories = Math.max(0, mountainData.totalCaloriesToBurn - state.burnedCalories - state.exerciseCalories);
+            
+            const mountainNumber = document.getElementById('mountain-number');
+            mountainNumber.textContent = Math.round(remainingCalories).toLocaleString();
+            mountainNumber.classList.add('live'); // Add live animation
+            
             document.getElementById('goal-date').textContent = mountainData.targetDate.toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -796,6 +914,7 @@
             document.getElementById('weight-to-lose').textContent = `${mountainData.weightToLose} ${state.units === 'imperial' ? 'lbs' : 'kg'}`;
             document.getElementById('weekly-goal').textContent = `${state.weeklyWeightLoss} ${state.units === 'imperial' ? 'lb' : 'kg'}/week`;
             document.getElementById('mountain-burned-today').textContent = Math.round(state.burnedCalories);
+            document.getElementById('mountain-exercise-today').textContent = Math.round(state.exerciseCalories);
         }
 
         // Initialize app
@@ -833,7 +952,9 @@
         function resetDay() {
             state.burnedCalories = 0;
             state.loggedCalories = 0;
+            state.exerciseCalories = 0;
             state.foodEntries = [];
+            state.exerciseEntries = [];
             state.lastReset = new Date();
             saveState();
             updateDisplay();
@@ -904,20 +1025,51 @@
 
         // Update main display
         function updateDisplay() {
-            const netCalories = state.dailyCalories - state.burnedCalories + state.loggedCalories;
-            const percentage = Math.max(0, Math.min(100, (netCalories / state.dailyCalories) * 100));
+            // Calculate weight loss target calories
+            const weeklyCalorieDeficit = state.weeklyWeightLoss * 3500; // calories per week
+            const dailyCalorieDeficit = weeklyCalorieDeficit / 7; // calories per day
+            let weightLossTarget = state.dailyCalories - dailyCalorieDeficit; // target calories for weight loss
+            
+            // Safety check: don't go below 1200 calories
+            if (weightLossTarget < 1200) {
+                weightLossTarget = 1200;
+                // Show warning if this is the first time
+                if (!state.unsafeTargetWarningShown) {
+                    const warning = document.createElement('div');
+                    warning.className = 'warning-banner';
+                    warning.innerHTML = '⚠️ <strong>Safety Notice:</strong> Your target was adjusted to 1200 calories minimum for health safety. Consider a slower weight loss goal.';
+                    document.body.appendChild(warning);
+                    
+                    state.unsafeTargetWarningShown = true;
+                    saveState();
+                    
+                    // Auto-remove after 10 seconds
+                    setTimeout(() => {
+                        if (warning.parentNode) {
+                            warning.remove();
+                        }
+                    }, 10000);
+                }
+            }
+            
+            // Calculate net calories including exercise (logged - burned - exercise)
+            const netCalories = state.loggedCalories - state.burnedCalories - state.exerciseCalories;
+            const percentage = Math.max(0, Math.min(100, ((state.dailyCalories - state.burnedCalories + state.loggedCalories - state.exerciseCalories) / state.dailyCalories) * 100));
             
             const calorieNumber = document.getElementById('calorie-number');
-            calorieNumber.textContent = Math.round(netCalories);
+            calorieNumber.textContent = Math.round(state.dailyCalories - state.burnedCalories + state.loggedCalories - state.exerciseCalories);
             calorieNumber.classList.add('live'); // Add live animation
             
-            document.getElementById('net-calories').textContent = Math.round(state.loggedCalories - state.burnedCalories);
+            // Update summary fields
+            document.getElementById('calorie-target').textContent = `${Math.round(weightLossTarget)} kcal`;
+            document.getElementById('calories-logged').textContent = `${Math.round(state.loggedCalories)} kcal`;
+            document.getElementById('net-calories').textContent = Math.round(netCalories);
             document.getElementById('food-count').textContent = `${state.foodEntries.length} items`;
             
             // Update progress bar
             document.getElementById('progress-fill').style.width = `${percentage}%`;
             
-            // Update zone indicator
+            // Update zone indicator based on net calories
             const zoneIndicator = document.getElementById('zone-indicator');
             const mountain = document.getElementById('calorie-mountain');
             
@@ -925,11 +1077,11 @@
                 zoneIndicator.textContent = 'Deficit';
                 zoneIndicator.className = 'zone-indicator zone-green';
                 mountain.style.background = 'linear-gradient(135deg, #4caf50, #45a049)';
-            } else if (netCalories <= state.dailyCalories * 0.1) {
+            } else if (netCalories <= 200) {
                 zoneIndicator.textContent = 'On Track';
                 zoneIndicator.className = 'zone-indicator zone-green';
                 mountain.style.background = 'linear-gradient(135deg, #4facfe, #00f2fe)';
-            } else if (netCalories <= state.dailyCalories * 0.2) {
+            } else if (netCalories <= 500) {
                 zoneIndicator.textContent = 'Neutral';
                 zoneIndicator.className = 'zone-indicator zone-yellow';
                 mountain.style.background = 'linear-gradient(135deg, #ffd89b, #19547b)';
@@ -940,8 +1092,7 @@
             }
             
             // Update weight estimate
-            const netCaloriesForWeight = state.loggedCalories - state.burnedCalories;
-            const weightChange = netCaloriesForWeight / 3500; // 3500 calories = 1 lb
+            const weightChange = netCalories / 3500; // 3500 calories = 1 lb
             const weightEstimate = document.getElementById('weight-estimate');
             
             if (Math.abs(weightChange) < 0.01) {
@@ -949,6 +1100,11 @@
             } else {
                 const changeText = weightChange > 0 ? '+' : '';
                 weightEstimate.textContent = `${changeText}${weightChange.toFixed(2)} lbs`;
+            }
+            
+            // Update mountain display if it's visible
+            if (document.getElementById('mountain-screen').classList.contains('active')) {
+                updateMountainDisplay();
             }
             
             // Check for warnings
@@ -977,6 +1133,43 @@
             openModal('foodModal');
         }
 
+        function openFAQ() {
+            openModal('faqModal');
+        }
+
+        function openExercise() {
+            openModal('exerciseModal');
+        }
+
+        function logExercise() {
+            const type = document.getElementById('exerciseType').value;
+            const duration = parseInt(document.getElementById('exerciseDuration').value);
+            const calories = parseInt(document.getElementById('exerciseCalories').value);
+            const feeling = document.getElementById('exerciseFeeling').value;
+            
+            if (isNaN(duration) || isNaN(calories) || duration <= 0 || calories <= 0) {
+                alert('Please enter valid duration and calories.');
+                return;
+            }
+            
+            state.exerciseCalories += calories;
+            state.exerciseEntries.push({
+                type: type,
+                duration: duration,
+                calories: calories,
+                feeling: feeling,
+                timestamp: new Date().toISOString()
+            });
+            
+            saveState();
+            updateDisplay();
+            closeModal('exerciseModal');
+            
+            // Clear form
+            document.getElementById('exerciseDuration').value = '';
+            document.getElementById('exerciseCalories').value = '';
+        }
+
         function openSettings() {
             document.getElementById('units').value = state.units;
             document.getElementById('age').value = state.age;
@@ -1003,20 +1196,126 @@
             openModal('settingsModal');
         }
 
+        // Mindful redirect suggestions by category
+        const mindfulRedirects = {
+            bored: [
+                "Do 10 jumping jacks or a quick stretch.",
+                "Name 3 things you can see, hear, and feel right now.",
+                "Doodle something silly on a sticky note.",
+                "Pretend you're a cat and stretch like one.",
+                "Touch something cold, something soft, and something round.",
+                "Open a random book and read one paragraph aloud.",
+                "Rearrange three small items on your desk or shelf.",
+                "Look out the window and count how many leaves you see moving.",
+                "Spin around slowly and flop on a pillow.",
+                "Pretend to be a weather reporter for 30 seconds.",
+                "Walk to the farthest light switch and flick it off/on.",
+                "Play your favorite song and do the weirdest dance you can.",
+                "Open your camera and take the silliest selfie possible.",
+                "Try to stand on one foot for 30 seconds.",
+                "Snap your fingers 30 times.",
+                "Whisper your favorite word out loud 5 times.",
+                "Stack 5 objects without them falling.",
+                "Draw a potato. Make it dramatic.",
+                "Count backwards from 47.",
+                "Imagine a frog narrating your actions for 60 seconds.",
+                "Pick one object and describe it like it's a treasure.",
+                "Pretend you forgot your own name. What would it be now?",
+                "Rearrange a tiny space like a mini interior decorator.",
+                "Clean one spoon and admire how shiny it is.",
+                "Walk to a mirror and make a silly face.",
+                "Turn your socks inside out and put them back on.",
+                "Make up a new word and define it.",
+                "Roll your shoulders in slow circles.",
+                "Imagine your life narrated by a sleepy owl.",
+                "Clap softly until you feel bored of clapping.",
+                "Make a shadow puppet with your hand.",
+                "Try balancing a pen on your nose.",
+                "Count how many green things are in your room.",
+                "Try to guess what time it is without looking.",
+                "Talk to a houseplant (or pretend to).",
+                "Set a timer for 90 seconds and do absolutely nothing."
+            ],
+            stressed: [
+                "Take 3 deep breaths and slowly exhale.",
+                "Hug yourself and gently sway side to side.",
+                "Place your hand over your heart and feel the rhythm.",
+                "Close your eyes and breathe like a sleepy bear.",
+                "Light a candle and watch the flame flicker.",
+                "Write one kind sentence to yourself.",
+                "List 3 things that are okay right now.",
+                "Stretch your arms above your head and sigh out loud.",
+                "Tense your toes, hold, then relax them.",
+                "Say \"I'm safe\" three times softly.",
+                "Touch something soft and really feel it.",
+                "Imagine your favorite peaceful place for one minute.",
+                "Hold a cup of tea or water like it's magic.",
+                "Pretend to slowly paint the air with your hands.",
+                "Rub your hands together, then rest them in your lap.",
+                "Breathe in for 4, hold 4, out for 4. Repeat once.",
+                "Smile gently (even if you don't mean it).",
+                "Draw a big heart in the air with your finger.",
+                "Hum a gentle tune to yourself.",
+                "Listen to the quietest sound you can hear.",
+                "Sit near a window and look at the light.",
+                "Wrap a blanket around your shoulders like a cloak.",
+                "Tap each fingertip with your thumb, one by one.",
+                "Imagine you're floating in a pool of soft jelly.",
+                "Lightly press your palms together and release.",
+                "Write \"I'm okay\" five times.",
+                "Sit down and slowly blink ten times.",
+                "Imagine yourself as a calm animal—like a koala.",
+                "Let your shoulders drop and breathe out.",
+                "Look around the room and find one kind color.",
+                "Picture your favorite cartoon giving you advice.",
+                "Sip water like it's from a mountain spring.",
+                "Gently shake out your arms.",
+                "Place both feet flat on the ground and feel gravity."
+            ],
+            habit: [
+                "Brush your teeth or rinse your mouth.",
+                "Go water a plant or pretend you're watering one.",
+                "Chew a mint or piece of gum.",
+                "Wipe a counter or surface until it's shiny.",
+                "Tie your shoelaces, even if you're barefoot.",
+                "Step outside and take one deep breath.",
+                "Walk to another room and turn around.",
+                "Put on hand lotion or lip balm.",
+                "Refill your water bottle and drink a sip.",
+                "Fold one item of clothing.",
+                "Change your shirt just because.",
+                "Take a photo of your hand like it's a celebrity.",
+                "Set a 5-minute timer and organize your keys.",
+                "Pretend to call someone, but just smile.",
+                "Open the fridge, close it, walk away.",
+                "Grab a notebook and write \"Not now\" on one page.",
+                "Stack 3 things in a neat little pile.",
+                "Blow gently on your hand and notice the sensation.",
+                "Unplug and replug a charger.",
+                "Say your name aloud, then say \"You got this.\"",
+                "Pretend to be a librarian and shush the air.",
+                "Do a superhero pose for 15 seconds.",
+                "Refill your pet's water dish (or pretend).",
+                "Fold a napkin and put it away like royalty.",
+                "Tap your fingers to a rhythm.",
+                "Sit down and cross your legs the \"wrong\" way.",
+                "Look at your hand and wiggle each finger slowly.",
+                "Look at your calendar and name your next day's plan.",
+                "Rearrange your fridge magnets (or wish you had some).",
+                "Say \"I choose not to eat right now\" softly to yourself.",
+                "Stretch your neck gently side to side.",
+                "Pick a number between 1 and 10 and clap that many times.",
+                "Put one thing away that's out of place.",
+                "Pretend you're a butler for 30 seconds."
+            ]
+        };
+
         // Mindful pause functionality
         function selectReason(reason) {
             const nonHungerReasons = ['bored', 'stressed', 'habit'];
-            const redirects = [
-                "Drink a full glass of water and try again in 5 minutes.",
-                "Take 3 deep breaths and check in with your body.",
-                "Name 3 things you can see, hear, and feel right now.",
-                "Text a friend something kind.",
-                "Do 10 jumping jacks or a quick stretch.",
-                "Write down what you're feeling in a journal.",
-                "Go for a 5-minute walk outside."
-            ];
             
             if (nonHungerReasons.includes(reason)) {
+                const redirects = mindfulRedirects[reason];
                 const redirect = redirects[Math.floor(Math.random() * redirects.length)];
                 alert(`Mindful Redirect: ${redirect}`);
                 closeModal('foodModal');
@@ -1161,29 +1460,51 @@
 
         // Check for warnings
         function checkWarnings(netCalories) {
-            // Use net calories from summary (logged - burned)
-            const netCaloriesForSummary = state.loggedCalories - state.burnedCalories;
+            // Use net calories from summary (logged - burned - exercise)
+            const netCaloriesForSummary = state.loggedCalories - state.burnedCalories - state.exerciseCalories;
             
-            // Remove existing warnings
-            const existingWarning = document.querySelector('.warning-banner');
-            if (existingWarning) {
-                existingWarning.remove();
-            }
+            // Get existing warning
+            let existingWarning = document.querySelector('.warning-banner');
             
-            // Check for high calorie surplus - sustained warning
+            // Determine what warning should be shown
+            let shouldShowWarning = false;
+            let warningText = '';
+            let warningClass = 'warning-banner';
+            
             if (netCaloriesForSummary > 500) {
-                const warning = document.createElement('div');
-                warning.className = 'warning-banner';
-                warning.textContent = '⚠️ High surplus - stay balanced!';
-                document.body.appendChild(warning);
+                shouldShowWarning = true;
+                warningText = '⚠️ High surplus - stay balanced!';
+                warningClass = 'warning-banner';
+            } else if (netCaloriesForSummary < -1500) {
+                shouldShowWarning = true;
+                warningText = '⚠️ Very low intake - eat more and find balance!';
+                warningClass = 'warning-banner low-calories';
+            } else if (netCaloriesForSummary < -1000 && netCaloriesForSummary >= -1500) {
+                shouldShowWarning = true;
+                warningText = '⚠️ Low intake - eat enough nutrients!';
+                warningClass = 'warning-banner low-calories';
             }
             
-            // Check for low calorie intake - sustained warning
-            if (netCaloriesForSummary < -1000) {
-                const warning = document.createElement('div');
-                warning.className = 'warning-banner low-calories';
-                warning.textContent = '⚠️ Low intake - eat enough nutrients!';
-                document.body.appendChild(warning);
+            // If we should show a warning
+            if (shouldShowWarning) {
+                // If no warning exists, create one
+                if (!existingWarning) {
+                    const warning = document.createElement('div');
+                    warning.className = warningClass;
+                    warning.textContent = warningText;
+                    document.body.appendChild(warning);
+                } else {
+                    // If warning exists but text/class is different, update it
+                    if (existingWarning.textContent !== warningText || existingWarning.className !== warningClass) {
+                        existingWarning.textContent = warningText;
+                        existingWarning.className = warningClass;
+                    }
+                }
+            } else {
+                // If we shouldn't show a warning, remove any existing one
+                if (existingWarning) {
+                    existingWarning.remove();
+                }
             }
         }
 
